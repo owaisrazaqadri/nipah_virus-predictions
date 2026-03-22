@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Nipah Virus Risk Prediction System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Splash Screen */
+        .splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c2c 0%, #0f2b1f 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease;
+        }
+        .splash h1 {
+            font-size: 4rem;
+            color: #fff;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            text-align: center;
+            padding: 20px;
+            animation: fadeIn 1s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Main Content */
+        body {
+            background: linear-gradient(145deg, #e0f0e8 0%, #c8dfd4 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 32px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.1);
+            overflow: hidden;
+            backdrop-filter: blur(2px);
+            transition: all 0.3s;
+        }
+        .header {
+            background: #1e5a3a;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        .form-card {
+            padding: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #1e3c2c;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1e5a3a;
+            box-shadow: 0 0 0 3px rgba(30,90,58,0.2);
+        }
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 8px;
+        }
+        .checkbox-group label {
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .checkbox-group input {
+            width: auto;
+            margin-right: 5px;
+        }
+        hr {
+            margin: 20px 0;
+            border: none;
+            height: 1px;
+            background: #ddd;
+        }
+        .btn {
+            background: #1e5a3a;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background: #0f3b26;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 20px;
+            background: #f8fafc;
+            border-left: 6px solid #1e5a3a;
+            display: none;
+        }
+        .result h3 {
+            margin-bottom: 15px;
+            color: #1e3c2c;
+        }
+        .risk-high {
+            border-left-color: #dc2626;
+            background: #fee2e2;
+        }
+        .risk-intermediate {
+            border-left-color: #eab308;
+            background: #fef9e3;
+        }
+        .risk-low {
+            border-left-color: #16a34a;
+            background: #e0f2e9;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            background: #f1f5f9;
+            color: #4b5563;
+            border-top: 1px solid #e2e8f0;
+        }
+        @media (max-width: 640px) {
+            .form-card {
+                padding: 20px;
+            }
+            .splash h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Splash Screen -->
+<div id="splash" class="splash">
+    <h1>Nipah Virus Prediction</h1>
+</div>
+
+<div class="container" id="mainContent" style="display: none;">
+    <div class="header">
+        <h2>🦇 Clinical Decision Support System</h2>
+        <p>Early risk stratification for suspected Nipah virus cases</p>
+    </div>
+    <div class="form-card">
+        <form id="riskForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" id="name" placeholder="e.g., Ahmed Khan" required>
+                </div>
+                <div class="form-group">
+                    <label>Father's Name</label>
+                    <input type="text" id="fatherName" placeholder="e.g., Abdullah Khan" required>
+                </div>
+                <div class="form-group">
+                    <label>Age (years)</label>
+                    <input type="number" id="age" min="1" max="100" value="35" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fever Duration (days)</label>
+                    <input type="number" id="feverDays" min="1" max="14" value="5" required>
+                </div>
+                <div class="form-group">
+                    <label>Oxygen Saturation (%)</label>
+                    <input type="number" id="oxygenSat" min="70" max="100" value="95" step="1">
+                </div>
+            </div>
+
+            <label>Clinical Symptoms</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="cough"> Cough</label>
+                <label><input type="checkbox" id="dyspnea"> Difficulty Breathing</label>
+                <label><input type="checkbox" id="alteredSensorium"> Altered Sensorium</label>
+                <label><input type="checkbox" id="seizures"> Seizures</label>
+            </div>
+
+            <label>Epidemiological Exposures</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="contactCase"> Contact with Confirmed Case</label>
+                <label><input type="checkbox" id="batExposure"> Bat / Fruit Exposure</label>
+                <label><input type="checkbox" id="palmSap"> Date Palm Sap Consumption</label>
+                <label><input type="checkbox" id="endemicArea"> Endemic Area (Kerala/WB)</label>
+            </div>
+
+            <label>Laboratory Findings</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="thrombocytopenia"> Thrombocytopenia (Low Platelets)</label>
+            </div>
+
+            <button type="submit" class="btn">🔍 PREDICT RISK</button>
+        </form>
+
+        <div id="resultBox" class="result">
+            <h3>Risk Assessment Result</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+    <div class="footer">
+        Muhammad Owais Raza Qadri<br>
+        Bachelor's of Robotics and Intelligent Systems
+    </div>
+</div>
+
+<script>
+    // Hide splash after 3 seconds and show main content
+    setTimeout(() => {
+        const splash = document.getElementById('splash');
+        splash.style.opacity = '0';
+        setTimeout(() => {
+            splash.style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        }, 1000);
+    }, 3000);
+
+    // Risk calculation logic (simplified scoring based on research paper weights)
+    function calculateRisk(data) {
+        let score = 0;
+        const maxScore = 100;
+
+        // Neurological symptoms (major contribution)
+        if (data.alteredSensorium) score += 25;
+        if (data.seizures) score += 20;
+        // Respiratory symptoms
+        if (data.dyspnea) score += 12;
+        if (data.cough && data.dyspnea) score += 5;
+        // Epidemiological exposures
+        if (data.contactCase) score += 18;
+        if (data.palmSap) score += 15;
+        if (data.batExposure) score += 8;
+        if (data.endemicArea) score += 5;
+        // Laboratory
+        if (data.thrombocytopenia) score += 10;
+        // Fever duration (longer fever adds small risk)
+        if (data.feverDays > 7) score += 5;
+        // Oxygen desaturation
+        if (data.oxygenSat < 94) score += 10;
+        else if (data.oxygenSat < 90) score += 15;
+
+        // Cap at max
+        score = Math.min(score, maxScore);
+        // Convert to probability (0-100%)
+        let probability = score / 100;
+        return probability;
+    }
+
+    document.getElementById('riskForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Gather input values
+        const name = document.getElementById('name').value.trim() || "Unknown";
+        const fatherName = document.getElementById('fatherName').value.trim() || "Unknown";
+        const age = parseInt(document.getElementById('age').value);
+        const feverDays = parseInt(document.getElementById('feverDays').value);
+        const oxygenSat = parseInt(document.getElementById('oxygenSat').value);
+        const cough = document.getElementById('cough').checked;
+        const dyspnea = document.getElementById('dyspnea').checked;
+        const alteredSensorium = document.getElementById('alteredSensorium').checked;
+        const seizures = document.getElementById('seizures').checked;
+        const contactCase = document.getElementById('contactCase').checked;
+        const batExposure = document.getElementById('batExposure').checked;
+        const palmSap = document.getElementById('palmSap').checked;
+        const endemicArea = document.getElementById('endemicArea').checked;
+        const thrombocytopenia = document.getElementById('thrombocytopenia').checked;
+
+        const inputData = {
+            alteredSensorium, seizures, dyspnea, cough, contactCase,
+            palmSap, batExposure, endemicArea, thrombocytopenia,
+            feverDays, oxygenSat
+        };
+
+        const probability = calculateRisk(inputData);
+        const percent = (probability * 100).toFixed(1);
+        let riskCategory, recommendation, colorClass;
+
+        if (probability >= 0.7) {
+            riskCategory = "HIGH";
+            recommendation = "URGENT: Order RT-PCR testing immediately. Implement droplet/contact precautions. Isolate patient. Consult infectious disease specialist.";
+            colorClass = "risk-high";
+        } else if (probability >= 0.3) {
+            riskCategory = "INTERMEDIATE";
+            recommendation = "Monitor closely for symptom progression. Schedule confirmatory testing within 24-48 hours. Educate patient/family on warning signs. Enhanced vigilance required.";
+            colorClass = "risk-intermediate";
+        } else {
+            riskCategory = "LOW";
+            recommendation = "Standard clinical management for presenting symptoms. Routine follow-up. No specific Nipah testing indicated at this time.";
+            colorClass = "risk-low";
+        }
+
+        // Build result HTML
+        const resultHtml = `
+            <p><strong>Patient:</strong> ${name} (Father: ${fatherName})<br>
+            <strong>Age:</strong> ${age} years</p>
+            <p><strong>Predicted Probability:</strong> ${percent}%</p>
+            <p><strong>Risk Category:</strong> <span style="font-weight:bold; color:${probability>=0.7?'#dc2626':probability>=0.3?'#eab308':'#16a34a'}">${riskCategory}</span></p>
+            <p><strong>Recommended Actions:</strong><br>${recommendation}</p>
+            <hr>
+            <p><em>Key Risk Factors Identified:</em><br>
+            ${alteredSensorium ? '• Neurological symptoms (altered sensorium)<br>' : ''}
+            ${seizures ? '• Seizures (high-risk neurological manifestation)<br>' : ''}
+            ${contactCase ? '• Known contact with confirmed case<br>' : ''}
+            ${palmSap ? '• Date palm sap consumption history<br>' : ''}
+            ${batExposure ? '• Bat habitat exposure<br>' : ''}
+            ${endemicArea ? '• Located in endemic region<br>' : ''}
+            ${thrombocytopenia ? '• Thrombocytopenia (low platelets)<br>' : ''}
+            ${dyspnea ? '• Respiratory distress<br>' : ''}
+            ${oxygenSat < 94 ? '• Low oxygen saturation<br>' : ''}
+            </p>
+        `;
+
+        const resultBox = document.getElementById('resultBox');
+        const resultContent = document.getElementById('resultContent');
+        resultContent.innerHTML = resultHtml;
+        resultBox.className = `result ${colorClass}`;
+        resultBox.style.display = 'block';
+        resultBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+</script>
+</body>
+</html>
